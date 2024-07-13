@@ -24,12 +24,12 @@ try {
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 
-    $mail->setFrom('openaivdoan@gmail.com', 'DoandepTrai');
-    $mail->addAddress($email, 'Doan');
+    $mail->setFrom('openaivdoan@gmail.com', 'Quan');
+    $mail->addAddress($email, 'Quan');
 
     $mail->isHTML(true);
     $mail->Subject = 'Thanh toan hoa don';
-    $mail->Body = 'Chân thành cảm ơn bạn đã chọn *Doan* để làm đẹp cho bản thân! Chúng tôi rất vui mừng được phục vụ và hy vọng rằng sản phẩm bạn chọn sẽ mang lại sự thoải mái và phong cách. Chúc bạn luôn tỏa sáng và hạnh phúc mỗi ngày. Hãy tiếp tục là chính mình và đừng quên ghé thăm cửa hàng của chúng tôi thường xuyên!';
+    $mail->Body = 'Chân thành cảm ơn bạn đã chọn *Quan* để làm đẹp cho bản thân! Chúng tôi rất vui mừng được phục vụ và hy vọng rằng sản phẩm bạn chọn sẽ mang lại sự thoải mái và phong cách. Chúc bạn luôn tỏa sáng và hạnh phúc mỗi ngày. Hãy tiếp tục là chính mình và đừng quên ghé thăm cửa hàng của chúng tôi thường xuyên!';
 
     $mail->send();
     // echo 'Message has been sent';

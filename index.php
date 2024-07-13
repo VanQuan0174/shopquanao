@@ -55,29 +55,54 @@ switch ($url) {
         break;
 
         // Giỏ hàng
-    case "them_gio_hang":
-        $title = "Giỏ hàng";
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            extract($_POST);
-            $lay_id_san_pham_kich_co = lay_id_san_pham_kich_co($id_sp, $id_kc);
-            $check_san_pham_gio_hang = check_san_pham_gio_hang($_SESSION["tai_khoan"]["id"], $lay_id_san_pham_kich_co["id"]);
-
-            san_pham_kich_co_gio_hang($_SESSION["tai_khoan"]["id"], $lay_id_san_pham_kich_co["id"], $so_luong);
-
-            // Tạo session "gio_hang" nếu chưa tồn tại
-            if (!isset($_SESSION["gio_hang"])) {
-                $_SESSION["gio_hang"] = array();
+        case "them_gio_hang":
+            $title = "Giỏ hàng";
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                extract($_POST);
+        
+                // Kiểm tra nếu kích cỡ chưa được chọn
+                if (empty($id_kc)) {
+                    $_SESSION['error'] = "Vui lòng chọn kích cỡ.";
+                    header("location: index.php?url=san_pham&id=" . $id_sp); // Chuyển hướng về trang sản phẩm
+                    exit();
+                }
+        
+                $lay_id_san_pham_kich_co = lay_id_san_pham_kich_co($id_sp, $id_kc);
+                $check_san_pham_gio_hang = check_san_pham_gio_hang($_SESSION["tai_khoan"]["id"], $lay_id_san_pham_kich_co["id"]);
+        
+                san_pham_kich_co_gio_hang($_SESSION["tai_khoan"]["id"], $lay_id_san_pham_kich_co["id"], $so_luong);
+        
+                // Tạo session "gio_hang" nếu chưa tồn tại
+                if (!isset($_SESSION["gio_hang"])) {
+                    $_SESSION["gio_hang"] = array();
+                }
+        
+                // Kiểm tra xem sản phẩm đã có trong giỏ hàng hay chưa
+                $product_exists = false;
+                foreach ($_SESSION["gio_hang"] as &$item) {
+                    if ($item["id_sp_kc"] == $lay_id_san_pham_kich_co["id"]) {
+                        // Nếu sản phẩm đã có trong giỏ hàng, cập nhật số lượng
+                        $item["so_luong"] += $so_luong;
+                        $product_exists = true;
+                        break;
+                    }
+                }
+        
+                // Nếu sản phẩm chưa có trong giỏ hàng, thêm sản phẩm mới
+                if (!$product_exists) {
+                    $san_pham = array(
+                        "id_kh" => $_SESSION["tai_khoan"]["id"],
+                        "id_sp_kc" => $lay_id_san_pham_kich_co["id"],
+                        "so_luong" => $so_luong
+                    );
+                    $_SESSION["gio_hang"][] = $san_pham;
+                }
+        
+                header("location: index.php?url=gio_hang");
+                exit(); // Đảm bảo không tiếp tục thực hiện các mã khác sau header
             }
-
-            // Thêm sản phẩm vào session "gio_hang"
-            $san_pham = array(
-                "id_kh" => $_SESSION["tai_khoan"]["id"],
-                "id_sp_kc" => $lay_id_san_pham_kich_co["id"],
-                "so_luong" => $so_luong
-            );
-            header("location: index.php?url=gio_hang");
-        }
-        break;
+            break;
+        
 
     case "gio_hang":
         $title = "Giỏ hàng";
@@ -90,52 +115,53 @@ switch ($url) {
         // ========== SẢN PHẨM ========== //
 
         // ========== THANH TOÁN ========== //
-    case "thanh_toan":
-        $title = "Thanh toán";
-
-        $all_phuong_thuc_thanh_toan = all_phuong_thuc_thanh_toan();
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $id_kh = $_POST["id_kh"];
-            $tong_gia_gio_hang = $_POST["tong_gia_gio_hang"];
-            $tong_sl_sp = $_POST["tong_sl_sp"];
-
-            if (isset($_POST["id_sp_kc"]) && is_array($_POST["id_sp_kc"])) {
-                $id_sp_kc = $_POST["id_sp_kc"];
+        case "thanh_toan":
+            $title = "Thanh toán";
+    
+            $all_phuong_thuc_thanh_toan = all_phuong_thuc_thanh_toan();
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                $id_kh = $_POST["id_kh"];
+                $tong_gia_gio_hang = $_POST["tong_gia_gio_hang"];
+                $tong_sl_sp = $_POST["tong_sl_sp"];
+    
+                if (isset($_POST["id_sp_kc"]) && is_array($_POST["id_sp_kc"])) {
+                    $id_sp_kc = $_POST["id_sp_kc"];
+                }
+    
+                // var_dump($id_sp_kc);
             }
-
-            // var_dump($id_sp_kc);
-        }
-        $VIEW = "assets/vnpay_php/index.php";
-        break;
-
-    case "tien_hanh_thanh_toan":
-        $title = "Thanh toán";
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            extract($_POST);
-
-            $thong_tin_tai_khoan = thong_tin_tai_khoan($id_kh);
-            $email_kh = $thong_tin_tai_khoan["email"];
-
-            // var_dump($id_sp_kc);
-            if (!is_array($id_sp_kc)) {
-                $id_sp_kc = explode(",", $id_sp_kc);
+            $VIEW = "assets/vnpay_php/index.php";
+            break;
+    
+        case "tien_hanh_thanh_toan":
+            $title = "Thanh toán";
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                extract($_POST);
+    
+                $thong_tin_tai_khoan = thong_tin_tai_khoan($id_kh);
+                $email_kh = $thong_tin_tai_khoan["email"];
+    
+                // var_dump($id_sp_kc);
+                if (!is_array($id_sp_kc)) {
+                    $id_sp_kc = explode(",", $id_sp_kc);
+                }
+                $id_sp_kc_string = implode(",", $id_sp_kc);
+                // var_dump($id_sp_kc_string);
+    
+                if ($pttt == 1) {
+                    $id_don_hang = add_don_hang($id_kh, $ten_nguoi_nhan, $email_nguoi_nhan, $sdt_nguoi_nhan, $dc_nguoi_nhan, $ghi_chu, $pttt, $amount, 0);
+                    add_don_hang_chi_tiet($id_don_hang, $id_sp_kc_string, $so_luong_san_pham, $amount);
+                    xoa_gio_hang($_SESSION["tai_khoan"]["id"]);
+                } else {
+                    $id_don_hang = add_don_hang($id_kh, $ten_nguoi_nhan, $email_nguoi_nhan, $sdt_nguoi_nhan, $dc_nguoi_nhan, $ghi_chu, $pttt, $amount, $amount);
+                    add_don_hang_chi_tiet($id_don_hang, $id_sp_kc_string, $so_luong_san_pham, $amount);
+                    xoa_gio_hang($_SESSION["tai_khoan"]["id"]);
+                }
             }
-            $id_sp_kc_string = implode(",", $id_sp_kc);
-            // var_dump($id_sp_kc_string);
-
-            if ($pttt == 1) {
-                $id_don_hang = add_don_hang($id_kh, $ten_nguoi_nhan, $email_nguoi_nhan, $sdt_nguoi_nhan, $dc_nguoi_nhan, $ghi_chu, $pttt, $amount, 0);
-                add_don_hang_chi_tiet($id_don_hang, $id_sp_kc_string, $so_luong_san_pham, $amount);
-                xoa_gio_hang($_SESSION["tai_khoan"]["id"]);
-            } else {
-                $id_don_hang = add_don_hang($id_kh, $ten_nguoi_nhan, $email_nguoi_nhan, $sdt_nguoi_nhan, $dc_nguoi_nhan, $ghi_chu, $pttt, $amount, $amount);
-                add_don_hang_chi_tiet($id_don_hang, $id_sp_kc_string, $so_luong_san_pham, $amount);
-                xoa_gio_hang($_SESSION["tai_khoan"]["id"]);
-            }
-        }
-        require_once "assets/PHPMailer/sendmail.php";
-        $VIEW = "assets/vnpay_php/vnpay_create_payment.php";
-        break;
+            require_once "assets/PHPMailer/sendmail.php";
+            $VIEW = "assets/vnpay_php/vnpay_create_payment.php";
+            break;
+            // ========== THANH TOÁN ==========
         // ========== THANH TOÁN ========== //
 
         // ========== TÀI KHOẢN ========== //

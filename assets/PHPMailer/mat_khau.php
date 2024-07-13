@@ -33,8 +33,8 @@ try {
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 
-    $mail->setFrom('openaivdoan@gmail.com', 'DoandepTrai');
-    $mail->addAddress($email, 'Doan');
+    $mail->setFrom('openaivdoan@gmail.com', 'Quan');
+    $mail->addAddress($email, 'Quan');
 
     $mail->isHTML(true);
     $mail->Subject = 'Lay lai mat khau';
