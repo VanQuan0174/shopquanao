@@ -529,7 +529,7 @@ switch ($url) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             extract($_POST);
 
-            sua_don_hang($id_dh, $ttdh);
+            update_don_hang($id_dh, $ttdh);
             $success = "Sửa thành công !";
         }
         $ct_don_hang = one_don_hang($id_dh);

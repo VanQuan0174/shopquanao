@@ -42,7 +42,7 @@ function one_don_hang($id_don_hang)
     return $don_hang;
 }
 
-function sua_don_hang($id, $trang_thai)
+function update_don_hang($id, $trang_thai)
 {
     $sql = "update don_hang set id_tt_don_hang = ? where id = ?";
     pdo_execute($sql, $trang_thai, $id);

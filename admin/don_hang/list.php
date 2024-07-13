@@ -13,7 +13,7 @@
                     <table class="table table-hover table-bordered" id="sampleTable">
                         <thead>
                             <tr>
-                                <th>Mã đơn hàng</th>
+                                <th>ID đơn hàng</th>
                                 <th>Email khách hàng</th>
                                 <th>Tên người nhận</th>
                                 <th>Email người nhận</th>
